@@ -3,6 +3,7 @@ class Authenticator():
 
   def __init__(self):
     self.user_id = ""
+    self.user_dict = {}
 
   def isLoggedIn(self):
     return self.user_id != ""
@@ -15,3 +16,6 @@ class Authenticator():
 
   def get_user_id(self):
     return self.user_id
+
+  def register(self, user_id, frames):
+    self.user_dict[user_id] = frames

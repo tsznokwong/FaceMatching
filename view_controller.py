@@ -31,6 +31,12 @@ class ViewController():
     self.recording_progress.pack(padx=8, pady=8)
     self.recording_frames = []
 
+    self.user_id_field = Text(self.window, height=1)
+    self.user_id_field.configure(background="grey")
+    self.user_id_field.pack(padx=8, pady=8)
+    self.confirm_button = Button(self.window, text="Confirm Register", command=self.on_click_confirm)
+    self.confirm_button.pack(padx=8, pady=8)
+
     self.camera = cv2.VideoCapture(0)
     self.update_ui()
 
@@ -38,6 +44,7 @@ class ViewController():
     self.update_register_button()
     self.update_counter()
     self.update_progress()
+    self.update_user_id_field()
     
   def update_register_button(self):
     text = f"Logout {self.auth.get_user_id()}" if self.auth.isLoggedIn() else "Register"
@@ -58,6 +65,14 @@ class ViewController():
       self.recording_progress.pack()
     else:
       self.recording_progress.pack_forget()
+  
+  def update_user_id_field(self):
+    if len(self.recording_frames) == self.batch_size:
+      self.user_id_field.pack()
+      self.confirm_button.pack()
+    else:
+      self.user_id_field.pack_forget()
+      self.confirm_button.pack_forget()
     
   def count_down(self):
     self.counter -= 1
@@ -83,6 +98,13 @@ class ViewController():
       self.count_down()
       self.update_counter()
 
+  def on_click_confirm(self):
+    user_id = self.user_id_field.get("1.0", "end-1c")
+    self.auth.register(user_id, self.recording_frames)
+    self.recording_frames = []
+    self.register_button.pack()
+    self.update_ui()
+
   def video_loop(self):
     success, frame = self.camera.read()
     if success:
@@ -97,7 +119,7 @@ class ViewController():
         if (self.batch_size == len(self.recording_frames)):
           self.recording = False
           self.update_progress()
-          print(type(image))
+          self.update_user_id_field()
       self.panel.imgtk = imgtk
       self.panel.configure(image=imgtk)
       self.window.after(50, self.video_loop)
