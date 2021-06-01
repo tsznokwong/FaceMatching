@@ -1,15 +1,17 @@
-_user_id = ""
 
-def isLoggedIn():
-  return _user_id != ""
+class Authenticator():
 
-def login(user_id):
-  global _user_id
-  _user_id = user_id
+  def __init__(self):
+    self.user_id = ""
 
-def logout():
-  global _user_id
-  _user_id = ""
+  def isLoggedIn(self):
+    return self.user_id != ""
 
-def get_user_id():
-  return _user_id
+  def login(self, user_id):
+    self.user_id = user_id
+
+  def logout(self):
+    self.user_id = ""
+
+  def get_user_id(self):
+    return self.user_id
