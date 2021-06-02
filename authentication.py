@@ -5,6 +5,7 @@ from torch.utils.data import DataLoader
 class Authenticator():
 
   def __init__(self, batch_size):
+    self.matching = False
     self.batch_size = batch_size
     self.user_id = ""
     self.user_dict = {}
@@ -21,8 +22,10 @@ class Authenticator():
 
   def login(self, user_id):
     self.user_id = user_id
+    print(f"{user_id} Login")
 
   def logout(self):
+    print(f"{user_id} Logout")
     self.user_id = ""
 
   def get_user_id(self):
@@ -31,16 +34,21 @@ class Authenticator():
   def register(self, user_id, frames):
     self.user_dict[user_id] = frames
 
+  def can_match(self):
+    return not self.isLoggedIn() and not self.matching
+
   def match(self, frame):
-    if self.isLoggedIn():
+    if not self.can_match():
       return
+    self.matching = True
     for (key, frames) in self.user_dict.items():
       dataset = FaceDataset(frames, frame)
-      loader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False, num_workers=2, pin_memory=True)
+      loader = DataLoader(dataset, batch_size=self.batch_size, shuffle=False)
       count = self.__pred__(loader)
-      if count > self.batch_size / 2:
+      if count > self.batch_size * 0.8:
         self.login(key)
-        return
+        break
+    self.matching = False
 
   def __pred__(self, loader):
     self.model.eval()

@@ -3,12 +3,12 @@ import tkinter.ttk as ttk
 import cv2
 from PIL import Image, ImageTk
 from authentication import *
-from threading import Timer
+from threading import Timer, Thread
 
 class ViewController():
 
   def __init__(self):
-    self.batch_size = 64
+    self.batch_size = 128
     self.auth = Authenticator(self.batch_size)
     self.window = Tk()
 
@@ -116,6 +116,9 @@ class ViewController():
       self.panel_counter = (self.panel_counter + 1) % 20
 
       imgtk = ImageTk.PhotoImage(image=image)
+      self.panel.imgtk = imgtk
+      self.panel.configure(image=imgtk)
+      self.window.after(50, self.video_loop)
       if self.recording:
         self.recording_frames.append(image)
         self.recording_progress.step()
@@ -124,11 +127,13 @@ class ViewController():
           self.update_progress()
           self.update_user_id_field()
       elif len(self.recording_frames) == 0 and self.panel_counter == 0 and not self.auth.isLoggedIn():
-        self.auth.match(image)
-        self.update_ui()
-      self.panel.imgtk = imgtk
-      self.panel.configure(image=imgtk)
-      self.window.after(50, self.video_loop)
+        t = Thread(target=self.match, args=(image,))
+        t.start()
+
+  def match(self, image):
+    if self.auth.can_match():
+      self.auth.match(image)
+      self.update_ui()
 
   def start(self):
     self.video_loop()
