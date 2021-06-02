@@ -8,8 +8,8 @@ from threading import Timer
 class ViewController():
 
   def __init__(self):
-    self.auth = Authenticator()
-    self.batch_size = 128
+    self.batch_size = 64
+    self.auth = Authenticator(self.batch_size)
     self.window = Tk()
 
     self.window.title("Face ID Application")
@@ -18,6 +18,7 @@ class ViewController():
 
     self.panel = Label(self.window)
     self.panel.pack(padx=8, pady=8)
+    self.panel_counter = 0
 
     self.register_button = Button(self.window, text="Register", command=self.on_click_register)
     self.register_button.pack(padx=8, pady=8)
@@ -112,6 +113,8 @@ class ViewController():
       image = Image.fromarray(image)
       image = crop_square(image)
       image = image.transpose(Image.FLIP_LEFT_RIGHT)
+      self.panel_counter = (self.panel_counter + 1) % 20
+
       imgtk = ImageTk.PhotoImage(image=image)
       if self.recording:
         self.recording_frames.append(image)
@@ -120,6 +123,9 @@ class ViewController():
           self.recording = False
           self.update_progress()
           self.update_user_id_field()
+      elif len(self.recording_frames) == 0 and self.panel_counter == 0 and not self.auth.isLoggedIn():
+        self.auth.match(image)
+        self.update_ui()
       self.panel.imgtk = imgtk
       self.panel.configure(image=imgtk)
       self.window.after(50, self.video_loop)
