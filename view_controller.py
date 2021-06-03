@@ -126,14 +126,15 @@ class ViewController():
           self.recording = False
           self.update_progress()
           self.update_user_id_field()
-      elif len(self.recording_frames) == 0 and self.panel_counter == 0 and not self.auth.isLoggedIn():
+      elif self.counter == None and len(self.recording_frames) == 0 and self.panel_counter == 0 and not self.auth.isLoggedIn():
         t = Thread(target=self.match, args=(image,))
         t.start()
 
   def match(self, image):
     if self.auth.can_match():
-      self.auth.match(image)
-      self.update_ui()
+      success = self.auth.match(image)
+      if success:
+        self.update_ui()
 
   def start(self):
     self.video_loop()

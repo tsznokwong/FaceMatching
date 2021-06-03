@@ -22,10 +22,10 @@ class Authenticator():
 
   def login(self, user_id):
     self.user_id = user_id
-    print(f"{user_id} Login")
+    print(f"{self.user_id} Login")
 
   def logout(self):
-    print(f"{user_id} Logout")
+    print(f"{self.user_id} Logout")
     self.user_id = ""
 
   def get_user_id(self):
@@ -49,6 +49,7 @@ class Authenticator():
         self.login(key)
         break
     self.matching = False
+    return self.isLoggedIn()
 
   def __pred__(self, loader):
     self.model.eval()
